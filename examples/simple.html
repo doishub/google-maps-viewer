@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Demo - Google Maps Viewer</title>
+    <link href="demo/demo.css" rel="stylesheet">
+</head>
+<body>
+    <div id="map"></div>
+    <button id="add">Add Marker</button>
+    <script>
+        var map = null;
+        var ind = 0;
+
+        document.addEventListener('googlemaps.onApiReady', function(){
+            map = new GoogleMapsViewer('map', {
+                initInstant: true,
+                map: {
+                    zoom: 12,
+                    lat: 51.0968605,
+                    lng: 5.9690903
+                }
+            });
+        });
+
+        document.getElementById('add').addEventListener('click', function(e){
+            map.addMarker([51.0968605, (5.9690903 + ind)], {}, '<h5>Hello World</h5>');
+            ind = ind + 0.010;
+        });
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR-API-TOKEN&callback=onGoogleMapsApiReady" async></script>
+    <script src="../js/google-maps-viewer.js"></script>
+</body>
+</html>
