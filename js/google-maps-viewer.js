@@ -2,7 +2,7 @@
  * Google Maps Viewer
  *
  * @author Daniele Sciannimanica <https://github.com/doishub>
- * @version 0.0.3
+ * @version 0.0.4
  * @licence https://github.com/doishub/google-maps-viewer/blob/master/LICENSE
  */
 var GoogleMapsViewer = (function () {
@@ -70,7 +70,7 @@ var GoogleMapsViewer = (function () {
             }
 
             // check if the api ready for use
-            if(viewer.settings.initInstant && typeof google.maps !== 'object'){
+            if(viewer.settings.initInstant && typeof google !== 'object'){
                 console.warn('GoogleMapsViewer: google.maps is not defined. If you load the script by async, use onGoogleMapsApiReady-Callback and set option initInstant to false.');
                 return;
             }

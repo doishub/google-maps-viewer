@@ -2,26 +2,27 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Simple API Example</title>
+    <title>Load GEOJSON</title>
     <link href="demo/demo.css" rel="stylesheet">
     <script src="../js/google-maps-viewer.js"></script>
 </head>
 <body>
     <div id="map"></div>
-    <button id="add">Add Marker</button>
     <script>
-        var ind = 0;
+        /**
+         * Contents for popups can be passed via the properties.popup node
+         */
         var map = new GoogleMapsViewer('map', {
+            source: {
+                id: 'source',
+                type: 'geojson',
+                path: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/1.0_hour.geojson',
+            },
             map: {
-                zoom: 12,
-                lat: 51.0968605,
-                lng: 5.9690903
+                zoom: 1,
+                lat: 31.7860603,
+                lng: -132.0853276
             }
-        });
-
-        document.getElementById('add').addEventListener('click', function(e){
-            map.addMarker([51.0968605, (5.9690903 + ind)], {}, '<h5>Hello World</h5>');
-            ind = ind + 0.010;
         });
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=YOUR-API-TOKEN&callback=onGoogleMapsApiReady" async></script>

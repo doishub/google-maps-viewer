@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Wait until the API is loaded</title>
+    <link href="demo/demo.css" rel="stylesheet">
+    <script src="../js/google-maps-viewer.js"></script>
+</head>
+<body>
+    <div id="map"></div>
+    <script>
+        document.addEventListener('googlemaps.onApiReady', function(){
+            var map = new GoogleMapsViewer('map', {
+                initInstant: true,
+                map: {
+                    zoom: 12,
+                    lat: 51.0968605,
+                    lng: 5.9690903
+                }
+            });
+        });
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR-API-TOKEN&callback=onGoogleMapsApiReady" async></script>
+</body>
+</html>
