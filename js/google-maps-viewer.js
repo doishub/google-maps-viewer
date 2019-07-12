@@ -2,7 +2,7 @@
  * Google Maps Viewer
  *
  * @author Daniele Sciannimanica <https://github.com/doishub>
- * @version 0.0.4
+ * @version 0.0.5
  * @licence https://github.com/doishub/google-maps-viewer/blob/master/LICENSE
  */
 var GoogleMapsViewer = (function () {
@@ -320,6 +320,17 @@ var GoogleMapsViewer = (function () {
  * Listen to Google Callback for start building the map
  */
 function onGoogleMapsApiReady (e){
+    if (document.readyState !== 'complete') {
+        var stateCheck = setInterval(() => {
+            if (document.readyState === 'complete') {
+                clearInterval(stateCheck);
+                onGoogleMapsApiReady(e);
+            }
+        }, 100);
+
+        return false;
+    }
+
     var customOnReadyEvent = new CustomEvent('googlemaps.onApiReady', {detail: e});
 
     document.dispatchEvent(customOnReadyEvent);
