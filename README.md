@@ -71,5 +71,5 @@ A simple plugin to display Google Maps
 ```
 
  
-# Lisence
+# License
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/doishub/google-maps-viewer/blob/master/LICENSE)
