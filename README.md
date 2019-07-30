@@ -1,14 +1,19 @@
 # Google Maps Viewer
 A simple plugin to display Google Maps
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/doishub/google-maps-viewer/blob/master/LICENSE)
+
 ## How to Use
-##### Google Maps Viewer has a .js file in addition to the Google Maps library.
+##### Google Maps Viewer has a .js file in addition to the Google Maps library and other useful Plugins.
 ```html
     <script src="https://maps.googleapis.com/maps/api/js?key=YOUR-API-TOKEN&callback=onGoogleMapsApiReady" async></script>
     <script src="js/google-maps-viewer.js"></script>
     
     <!-- Optional for Cluster use -->
-    <script src="https://googlemaps.github.io/js-marker-clusterer/src/markerclusterer.js"></script>
+    <script src="https://cdn.rawgit.com/googlemaps/js-marker-clusterer/gh-pages/src/markerclusterer.js"></script>
+    
+    <!-- Optional for Spiderfier use -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier/1.0.3/oms.min.js"></script>
 ```
 
 ##### Create a container for the map
@@ -16,7 +21,7 @@ A simple plugin to display Google Maps
     <div id="myMap"></div>
 ```
 
-##### Initialize
+##### Initialize a simple map
  ```javascript
      var map = new GoogleMapsViewer('map', {
          initInstant: true,
@@ -41,12 +46,29 @@ A simple plugin to display Google Maps
         param: null,
     },
     marker: null,
+    popup: {
+        showEvent: 'click',
+        hideEvent: false,
+        options: null
+    },
+    spider: {
+        spiderfier: false,
+        closePopupOnUnspiderfy: true,
+        format: null,
+        options: {
+            keepSpiderfied: false,
+            markersWontMove: false,
+            markersWontHide: false,
+            basicFormatEvents: false
+        }
+    },
     cluster: {
         clustering: false,
         clusterSteps: null,
         styles: null,
-        clusterMaxZoom: 14,
-        clusterRadius: 50
+        options: {
+            maxZoom: 14
+        }
     },
     map: {
         bounds: false,
@@ -62,14 +84,7 @@ A simple plugin to display Google Maps
         minZoom: 3,
         maxZoom: 16,
         lat: null,
-        lng: null,
-        onLoad: function(){},
-        onLoadStyle: function(){},
-        onLoadAssets: function(){}
+        lng: null
     }
 }
 ```
-
- 
-# License
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/doishub/google-maps-viewer/blob/master/LICENSE)

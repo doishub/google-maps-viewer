@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Advanced example</title>
+    <link href="demo/demo.css" rel="stylesheet">
+    <script src="../js/google-maps-viewer.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier/1.0.3/oms.min.js"></script>
+    <script src="https://googlemaps.github.io/js-marker-clusterer/src/markerclusterer.js"></script>
+</head>
+<body>
+    <div id="map"></div>
+    <script>
+        var ind = 0;
+        var map = new GoogleMapsViewer('map', {
+            marker: {
+                imagePath: 'demo/pin.png',
+                imageWidth: 27,
+                imageHeight: 43
+            },
+            popup: {
+                showEvent: 'mouseover',
+                hideEvent: 'mouseout'
+            },
+            spider: {
+                spiderfier: true,
+                format: [
+                    ['demo/pin.png', 27, 43],
+                    ['demo/pin_plus.png', 27, 43],
+                    ['demo/pin_plus.png', 27, 43]
+                ],
+                options: {
+                    keepSpiderfied: true
+                }
+            },
+            cluster: {
+                clustering: true,
+                clusterSteps:[0,10,100],
+                styles: [
+                    {
+                        url: "demo/cluster_1.png?disablePathCount=1",
+                        width: 36,
+                        height: 36,
+                        anchor: [0,0],
+                        textColor: "#ffffff",
+                        textSize: 12
+                    },
+                    {
+                        url:"demo/cluster_2.png?disablePathCount=1",
+                        width: 55,
+                        height: 55,
+                        anchor: [0,0],
+                        textColor: "#ffffff",
+                        textSize: 14
+                    },
+                    {
+                        url:"demo/cluster_3.png?disablePathCount=1",
+                        width: 74,
+                        height: 74,
+                        anchor: [0,0],
+                        textColor: "#ffffff",
+                        textSize: 15
+                    }
+                ]
+            },
+            map: {
+                zoom: 1,
+                lat: 51.0968605,
+                lng: 5.9690903
+            }
+        });
+
+        document.addEventListener('googlemaps.onApiReady', function() {
+            for (var i = 0; i < 15; i++) {
+                map.addMarker([51.0968605, (5.9690903 + ind)], {}, '<h5>Hello World</h5>');
+
+                if (i === 10) {
+                    ind = ind + 0.03;
+                }
+            }
+        });
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUT-API-TOKEN&callback=onGoogleMapsApiReady" async></script>
+</body>
+</html>

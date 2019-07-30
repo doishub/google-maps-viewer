@@ -2,7 +2,7 @@
  * Google Maps Viewer
  *
  * @author Daniele Sciannimanica <https://github.com/doishub>
- * @version 0.0.5
+ * @version 0.0.6
  * @licence https://github.com/doishub/google-maps-viewer/blob/master/LICENSE
  */
 var GoogleMapsViewer = (function () {
@@ -13,6 +13,8 @@ var GoogleMapsViewer = (function () {
         var pub = {};
         var viewer = {};
         var useClustering = false;
+        var useSpiderfier = false;
+
         var defaults = {
             mapId: '',
             initInstant: false,
@@ -23,12 +25,29 @@ var GoogleMapsViewer = (function () {
                 param: null,
             },
             marker: null,
+            popup: {
+                showEvent: 'click',
+                hideEvent: false,
+                options: null
+            },
+            spider: {
+                spiderfier: false,
+                closePopupOnUnspiderfy: true,
+                format: null,
+                options: {
+                    keepSpiderfied: false,
+                    markersWontMove: false,
+                    markersWontHide: false,
+                    basicFormatEvents: false
+                }
+            },
             cluster: {
                 clustering: false,
                 clusterSteps: null,
                 styles: null,
-                clusterMaxZoom: 14,
-                clusterRadius: 50
+                options: {
+                    maxZoom: 14
+                }
             },
             map: {
                 bounds: false,
@@ -118,45 +137,97 @@ var GoogleMapsViewer = (function () {
                 viewer.map.setMapTypeId('custom_style');
             }
 
+            // add spiderfier
+            if(viewer.settings.spider !== null && viewer.settings.spider.spiderfier){
+                addSpiderSupport();
+            }
+
             // add cluster object
             if(viewer.settings.cluster !== null && viewer.settings.cluster.clustering){
-                viewer.cluster = new MarkerClusterer(viewer.map, viewer.markers, {
-                    // options
-                });
-
-                // set styles
-                if(viewer.settings.cluster.styles){
-                    viewer.cluster.setStyles(viewer.settings.cluster.styles);
-                }
-
-                // count to style calculator
-                viewer.cluster.setCalculator(function(markers, numStyles) {
-                    var count = markers.length;
-                    var steps = viewer.settings.cluster.clusterSteps;
-                    var index = 0;
-
-                    for (var i=0; i<steps.length; i++) {
-                        if (count > steps[i])
-                        {
-                            index++;
-                        }
-                    }
-
-                    index = Math.min(index, numStyles);
-
-                    return {
-                        text: count,
-                        index: index
-                    };
-                });
-
-                useClustering = true;
+                addClusterSupport();
             }
 
             // load source
             if(viewer.settings.source.path){
                 loadSource(viewer.settings.source.path, viewer.settings.source.param);
             }
+        };
+
+        var addClusterSupport = function(){
+            viewer.cluster = new MarkerClusterer(viewer.map, viewer.markers, viewer.settings.cluster.options);
+
+            // set styles
+            if(viewer.settings.cluster.styles){
+                viewer.cluster.setStyles(viewer.settings.cluster.styles);
+            }
+
+            // count to style calculator
+            viewer.cluster.setCalculator(function(markers, numStyles) {
+                var count = markers.length;
+                var steps = viewer.settings.cluster.clusterSteps;
+                var index = 0;
+
+                for (var i=0; i<steps.length; i++) {
+                    if (count > steps[i])
+                    {
+                        index++;
+                    }
+                }
+
+                index = Math.min(index, numStyles);
+
+                return {
+                    text: count,
+                    index: index
+                };
+            });
+
+            useClustering = true;
+        };
+
+        var addSpiderSupport = function(){
+            viewer.spider = new OverlappingMarkerSpiderfier(viewer.map, viewer.settings.spider.options);
+
+            // set marker format
+            if(viewer.settings.spider.format !== null) {
+                if(viewer.settings.spider.format.length === 3){
+                    viewer.spider.addListener('format', function (marker, status) {
+                        var p,w,h;
+                        var validStatus = [
+                            OverlappingMarkerSpiderfier.markerStatus.SPIDERFIED,
+                            OverlappingMarkerSpiderfier.markerStatus.SPIDERFIABLE,
+                            OverlappingMarkerSpiderfier.markerStatus.UNSPIDERFIABLE
+                        ];
+
+                        for(var i=0; i<validStatus.length; i++)
+                        {
+                            if(status === validStatus[i]){
+                                p = viewer.settings.spider.format[i][0];
+                                w = viewer.settings.spider.format[i][1];
+                                h = viewer.settings.spider.format[i][2];
+
+                                break;
+                            }
+                        }
+
+                        marker.setIcon({
+                            url: p,
+                            scaledSize: new google.maps.Size(w, h)
+                        });
+                    });
+                }else{
+                    console.warn('GoogleMapsViewer: Wrong parameter for format (spiderfier:format)');
+                }
+            }
+
+            // close active info windows on unspiderfy
+            viewer.spider.addListener('unspiderfy', function (a,b) {
+                if(viewer.settings.spider.closePopupOnUnspiderfy && viewer.currentInfoWindow){
+                    viewer.currentInfoWindow.close();
+                }
+            });
+
+            useSpiderfier = true;
         };
 
         var loadSource = function(path, param){
@@ -279,19 +350,31 @@ var GoogleMapsViewer = (function () {
             );
 
             if(popupContent) {
-                var popup = new google.maps.InfoWindow({
-                    content: popupContent
-                });
+                var popup = new google.maps.InfoWindow(
+                    extend({content: popupContent}, viewer.settings.popup.options)
+                );
 
-                marker.addListener('click', function() {
-                    if(viewer.currentInfoWindow){
-                        viewer.currentInfoWindow.close();
-                    }
+                if(viewer.settings.popup.showEvent){
+                    marker.addListener(viewer.settings.popup.showEvent === 'click' && useSpiderfier ? 'spider_click' : viewer.settings.popup.showEvent, function() {
+                        if(viewer.currentInfoWindow){
+                            viewer.currentInfoWindow.close();
+                        }
 
-                    popup.open(viewer.map, marker);
+                        popup.open(viewer.map, marker);
 
-                    viewer.currentInfoWindow = popup;
-                });
+                        viewer.currentInfoWindow = popup;
+                    });
+                }
+
+                if(viewer.settings.popup.hideEvent){
+                    marker.addListener(viewer.settings.popup.hideEvent, function() {
+                        if(viewer.currentInfoWindow){
+                            viewer.currentInfoWindow.close();
+                        }
+
+                        viewer.currentInfoWindow = null;
+                    });
+                }
             }
 
             // push to marker collection
@@ -300,6 +383,11 @@ var GoogleMapsViewer = (function () {
             // push marker to cluster object
             if(useClustering){
                 viewer.cluster.addMarker(marker);
+            }
+
+            // push marker to spider object
+            if(useSpiderfier){
+                viewer.spider.addMarker(marker);
             }
 
             // push to bounds
