@@ -2,7 +2,7 @@
  * Google Maps Viewer
  *
  * @author Daniele Sciannimanica <https://github.com/doishub>
- * @version 0.0.6
+ * @version 0.0.7
  * @licence https://github.com/doishub/google-maps-viewer/blob/master/LICENSE
  */
 var GoogleMapsViewer = (function () {
@@ -35,9 +35,9 @@ var GoogleMapsViewer = (function () {
                 closePopupOnUnspiderfy: true,
                 format: null,
                 options: {
-                    keepSpiderfied: false,
-                    markersWontMove: false,
-                    markersWontHide: false,
+                    keepSpiderfied: true,
+                    markersWontMove: true,
+                    markersWontHide: true,
                     basicFormatEvents: false
                 }
             },
@@ -98,7 +98,7 @@ var GoogleMapsViewer = (function () {
             if(!viewer.settings.initInstant){
                 document.addEventListener('googlemaps.onApiReady', createMap);
 
-            // init map directly
+                // init map directly
             }else{
                 createMap();
             }
@@ -137,6 +137,15 @@ var GoogleMapsViewer = (function () {
                 viewer.map.setMapTypeId('custom_style');
             }
 
+            // load source
+            if(viewer.settings.source.path){
+                loadSource(viewer.settings.source.path, viewer.settings.source.param);
+            }else{
+                initPlugins();
+            }
+        };
+
+        var initPlugins = function(){
             // add spiderfier
             if(viewer.settings.spider !== null && viewer.settings.spider.spiderfier){
                 addSpiderSupport();
@@ -145,11 +154,6 @@ var GoogleMapsViewer = (function () {
             // add cluster object
             if(viewer.settings.cluster !== null && viewer.settings.cluster.clustering){
                 addClusterSupport();
-            }
-
-            // load source
-            if(viewer.settings.source.path){
-                loadSource(viewer.settings.source.path, viewer.settings.source.param);
             }
         };
 
@@ -250,6 +254,9 @@ var GoogleMapsViewer = (function () {
 
                     // set data
                     viewer.geojson = results;
+
+                    // initialize plugins after all data has been loaded
+                    initPlugins();
 
                     // create marker by geojson
                     for (var i = 0; i < results.features.length; i++) {
