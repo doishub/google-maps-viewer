@@ -113,14 +113,6 @@ source: {
 }
 ``` 
 
-#### Popups via GEOJson
-The HTML content can be transmitted in any property field, which can be defined via `propSelector`.
-```javascript
-popup: {
-    propSelector: 'template',   // Property name to define from which field the content of a popup is read (asynchronous only)
-}
-```
-
 ### Popups
 ```javascript
 popup: {
