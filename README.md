@@ -138,7 +138,7 @@ If you want to load popups asynchronously, you have several options. You can loa
 popup: {
     propSelector: 'template',                           // Property name to define from which field the content of a popup is read (asynchronous only) 
     source: {
-        path: 'your/popup/template/path',               // Path to yout HTML content
+        path: 'your/popup/template/path',               // Path to your HTML content
         param: {                                        // optional Parameters
             param1: 'Hello',
             param2: 'World'
@@ -158,10 +158,11 @@ popup: {
     }
 }
 ```
+In this example, the `markerProps` object must contain the field `id`. If this is not the case, the value is not replaced.
 
 ## Methods
 
-##### Returns all data of the current map 
+##### Returns the Viewer-Object
 ```javascript
 getViewer()
 ```
