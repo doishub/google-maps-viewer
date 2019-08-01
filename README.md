@@ -42,23 +42,33 @@ A simple plugin to display Google Maps
     source: {
         id: 'source',
         type: 'geojson',
-        path: null,
+        path: false,
         param: null,
     },
-    marker: null,
+    marker: {
+        icon: null,
+        options: null
+    },
     popup: {
         showEvent: 'click',
         hideEvent: false,
-        options: null
+        options: null,
+        propSelector: 'template',
+        source: {
+            path: false,
+            param: null,
+            loader: true,
+            loaderMarkup: '<span class="loader"></span>'
+        }
     },
     spider: {
         spiderfier: false,
         closePopupOnUnspiderfy: true,
         format: null,
         options: {
-            keepSpiderfied: false,
-            markersWontMove: false,
-            markersWontHide: false,
+            keepSpiderfied: true,
+            markersWontMove: true,
+            markersWontHide: true,
             basicFormatEvents: false
         }
     },
@@ -87,4 +97,81 @@ A simple plugin to display Google Maps
         lng: null
     }
 }
+```
+
+## Examples
+#### Load Data via GEOJson
+```
+source: {
+    id: 'source',               // Source-ID
+    type: 'geojson',            // Source-Type
+    path: 'your/geosjon/path',  // Path to your GEOJson 
+    param: {                    // optional Parameters
+        param1: 'Hello',
+        param2: 'World'
+    }
+}
+``` 
+
+##### Popups via GEOJson
+The HTML content can be transmitted in any property field, which can be defined via `propSelector`.
+```
+popup: {
+    propSelector: 'template',   // Property name to define from which field the content of a popup is read (asynchronous only)
+}
+```
+
+#### Popups
+```
+popup: {
+    showEvent: 'mouseover', 
+    hideEvent: 'mouseleave',
+    options: {
+        ...                     //  See https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindowOptions
+    }
+}
+```
+
+##### Loading Popups asynchronously
+If you want to load popups asynchronously, you have several options. You can load popups directly via GEOJson, or only by clicking (or any other event).
+```
+popup: {
+    propSelector: 'template',                           // property name to define the content of a popup (only async) 
+    source: {
+        path: 'your/popup/template/path',               // Path to yout HTML content
+        param: {                                        // optional Parameters
+            param1: 'Hello',
+            param2: 'World'
+        }
+        loader: true,                                   // Show a loader while loading
+        loaderMarkup: '<span class="loader"></span>'
+    }
+}
+```
+
+#####Use placeholders to add dynamic data to the path
+Sometimes it is necessary to define a separate query for each marker on the map. In order to be able to use placeholders, it is necessary to specify them using `markerProps` (Markers loaded via a GEOJson are automatically filled with the transmitted `properties`-Object).
+```
+popup: { 
+    source: {
+        path: 'your/popup/template/%id%',               // Path to your HTML content with placeholder
+    }
+}
+```
+
+#### Methods
+
+#####Returns all data of the current map 
+```
+getViewer()
+```
+
+#####Add a Marker to the map 
+```
+addMarker(
+    latLng,        // Array or google.maps.LatLng Object
+    htmlContent,   // Popup content (optional)
+    markerOptions, // Passing more options for added marker (optional)
+    markerProps    // Own marker properties (optional)
+)
 ```
