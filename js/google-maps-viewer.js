@@ -436,7 +436,7 @@ var GoogleMapsViewer = (function () {
 
                             viewer.popupLoader.send();
                         }else{
-                            viewer.popup.setContent(marker.popup);
+                            viewer.popup.setContent(marker.popup.content);
                         }
 
                         viewer.popup.open(viewer.map, marker);
