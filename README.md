@@ -100,7 +100,7 @@ A simple plugin to display Google Maps
 ```
 
 ## Examples
-#### Load Data via GEOJson
+### Load Data via GEOJson
 ```
 source: {
     id: 'source',               // Source-ID
@@ -113,7 +113,7 @@ source: {
 }
 ``` 
 
-##### Popups via GEOJson
+#### Popups via GEOJson
 The HTML content can be transmitted in any property field, which can be defined via `propSelector`.
 ```
 popup: {
@@ -121,22 +121,22 @@ popup: {
 }
 ```
 
-#### Popups
+### Popups
 ```
 popup: {
     showEvent: 'mouseover', 
     hideEvent: 'mouseleave',
     options: {
-        ...                     //  See https://developers.google.com/maps/documentation/javascript/reference/info-window#InfoWindowOptions
+        ...                     //  See google documentation
     }
 }
 ```
 
-##### Loading Popups asynchronously
+#### Loading Popups asynchronously
 If you want to load popups asynchronously, you have several options. You can load popups directly via GEOJson, or only by clicking (or any other event).
 ```
 popup: {
-    propSelector: 'template',                           // property name to define the content of a popup (only async) 
+    propSelector: 'template',                           // Property name to define from which field the content of a popup is read (asynchronous only) 
     source: {
         path: 'your/popup/template/path',               // Path to yout HTML content
         param: {                                        // optional Parameters
@@ -149,7 +149,7 @@ popup: {
 }
 ```
 
-#####Use placeholders to add dynamic data to the path
+##### Use placeholders to add dynamic data to the path
 Sometimes it is necessary to define a separate query for each marker on the map. In order to be able to use placeholders, it is necessary to specify them using `markerProps` (Markers loaded via a GEOJson are automatically filled with the transmitted `properties`-Object).
 ```
 popup: { 
@@ -159,14 +159,14 @@ popup: {
 }
 ```
 
-#### Methods
+## Methods
 
-#####Returns all data of the current map 
+##### Returns all data of the current map 
 ```
 getViewer()
 ```
 
-#####Add a Marker to the map 
+##### Add a Marker to the map 
 ```
 addMarker(
     latLng,        // Array or google.maps.LatLng Object
