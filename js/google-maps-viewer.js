@@ -2,7 +2,7 @@
  * Google Maps Viewer
  *
  * @author Daniele Sciannimanica <https://github.com/doishub>
- * @version 0.0.8
+ * @version 0.0.9
  * @licence https://github.com/doishub/google-maps-viewer/blob/master/LICENSE
  */
 var GoogleMapsViewer = (function () {
@@ -32,6 +32,7 @@ var GoogleMapsViewer = (function () {
                 showEvent: 'click',
                 hideEvent: false,
                 options: null,
+                propSelector: 'template',
                 source: {
                     path: false,
                     param: null,
@@ -281,12 +282,19 @@ var GoogleMapsViewer = (function () {
                         var coords = results.features[i].geometry.coordinates;
                         var latLng = new google.maps.LatLng(coords[1],coords[0]);
 
-                        pub.addMarker(latLng, results.features[i].properties.popup, {}, results.features[i].properties);
+                        pub.addMarker(latLng, results.features[i].properties[ viewer.settings.popup.propSelector ], {}, results.features[i].properties);
                     }
 
                     // set viewport including all markers
                     if(!viewer.bounds.isEmpty()){
                         viewer.map.fitBounds(viewer.bounds);
+
+                        if(useClustering) {
+                            // Cluster fix: #469
+                            google.maps.event.addListenerOnce(viewer.map, 'idle', function () {
+                                viewer.cluster.repaint();
+                            });
+                        }
                     }
                 }
             };
@@ -426,7 +434,7 @@ var GoogleMapsViewer = (function () {
                                     // parse json
                                     var results = JSON.parse(viewer.popupLoader.responseText);
 
-                                    viewer.popup.setContent(results.results[0].template);
+                                    viewer.popup.setContent(results.results[0][viewer.settings.popup.propSelector]);
                                 }
                             };
 
@@ -467,6 +475,10 @@ var GoogleMapsViewer = (function () {
             if(viewer.settings.map.bounds){
                 viewer.bounds.extend(latLng);
             }
+        };
+
+        pub.getViewer = function(){
+            return viewer;
         };
 
         init();
