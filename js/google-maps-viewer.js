@@ -242,8 +242,8 @@ var GoogleMapsViewer = (function () {
 
             // close active info windows on unspiderfy
             viewer.spider.addListener('unspiderfy', function (a,b) {
-                if(viewer.settings.spider.closePopupOnUnspiderfy && viewer.currentInfoWindow){
-                    viewer.currentInfoWindow.close();
+                if(viewer.settings.spider.closePopupOnUnspiderfy){
+                    viewer.popup.close();
                 }
             });
 
