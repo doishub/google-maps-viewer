@@ -368,7 +368,7 @@ var GoogleMapsViewer = (function () {
             };
 
             // set icon from settings
-            if(viewer.settings.marker !== null && viewer.settings.marker.icon.imagePath){
+            if(viewer.settings.marker !== null && viewer.settings.marker.icon !== null && viewer.settings.marker.icon.imagePath){
                 defaultOptions = extend(defaultOptions, {
                     icon: viewer.settings.marker.icon.imagePath
                 });
