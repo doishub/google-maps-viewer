@@ -101,7 +101,7 @@ A simple plugin to display Google Maps
 
 ## Examples
 ### Load Data via GEOJson
-```
+```javascript
 source: {
     id: 'source',               // Source-ID
     type: 'geojson',            // Source-Type
@@ -115,14 +115,14 @@ source: {
 
 #### Popups via GEOJson
 The HTML content can be transmitted in any property field, which can be defined via `propSelector`.
-```
+```javascript
 popup: {
     propSelector: 'template',   // Property name to define from which field the content of a popup is read (asynchronous only)
 }
 ```
 
 ### Popups
-```
+```javascript
 popup: {
     showEvent: 'mouseover', 
     hideEvent: 'mouseleave',
@@ -134,7 +134,7 @@ popup: {
 
 #### Loading Popups asynchronously
 If you want to load popups asynchronously, you have several options. You can load popups directly via GEOJson, or only by clicking (or any other event).
-```
+```javascript
 popup: {
     propSelector: 'template',                           // Property name to define from which field the content of a popup is read (asynchronous only) 
     source: {
@@ -151,7 +151,7 @@ popup: {
 
 ##### Use placeholders to add dynamic data to the path
 Sometimes it is necessary to define a separate query for each marker on the map. In order to be able to use placeholders, it is necessary to specify them using `markerProps` (Markers loaded via a GEOJson are automatically filled with the transmitted `properties`-Object).
-```
+```javascript
 popup: { 
     source: {
         path: 'your/popup/template/%id%',               // Path to your HTML content with placeholder
@@ -162,12 +162,12 @@ popup: {
 ## Methods
 
 ##### Returns all data of the current map 
-```
+```javascript
 getViewer()
 ```
 
 ##### Add a Marker to the map 
-```
+```javascript
 addMarker(
     latLng,        // Array or google.maps.LatLng Object
     htmlContent,   // Popup content (optional)
