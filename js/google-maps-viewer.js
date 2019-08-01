@@ -2,7 +2,7 @@
  * Google Maps Viewer
  *
  * @author Daniele Sciannimanica <https://github.com/doishub>
- * @version 0.0.7
+ * @version 0.0.8
  * @licence https://github.com/doishub/google-maps-viewer/blob/master/LICENSE
  */
 var GoogleMapsViewer = (function () {
@@ -21,14 +21,23 @@ var GoogleMapsViewer = (function () {
             source: {
                 id: 'source',
                 type: 'geojson',
-                path: null,
+                path: false,
                 param: null,
             },
-            marker: null,
+            marker: {
+                icon: null,
+                options: null
+            },
             popup: {
                 showEvent: 'click',
                 hideEvent: false,
-                options: null
+                options: null,
+                source: {
+                    path: false,
+                    param: null,
+                    loader: true,
+                    loaderMarkup: '<span class="loader"></span>'
+                }
             },
             spider: {
                 spiderfier: false,
@@ -63,10 +72,7 @@ var GoogleMapsViewer = (function () {
                 minZoom: 3,
                 maxZoom: 16,
                 lat: null,
-                lng: null,
-                onLoad: function(){},
-                onLoadStyle: function(){},
-                onLoadAssets: function(){}
+                lng: null
             }
         };
 
@@ -129,6 +135,16 @@ var GoogleMapsViewer = (function () {
             // create bounds object
             viewer.bounds = new google.maps.LatLngBounds();
 
+            // create popup object
+            viewer.popup = new google.maps.InfoWindow(viewer.settings.popup.options);
+            viewer.popupAsync = false;
+
+            if(viewer.settings.popup.source !== null && viewer.settings.popup.source.path) {
+                // create an XHR object to load popups asynchronously
+                viewer.popupLoader = new XMLHttpRequest();
+                viewer.popupAsync = true;
+            }
+
             // add custom styles
             if(viewer.settings.map.styles !== null){
                 var customStyle = new google.maps.StyledMapType(viewer.settings.map.styles, {name: 'Normal'});
@@ -141,11 +157,11 @@ var GoogleMapsViewer = (function () {
             if(viewer.settings.source.path){
                 loadSource(viewer.settings.source.path, viewer.settings.source.param);
             }else{
-                initPlugins();
+                loadExtensions();
             }
         };
 
-        var initPlugins = function(){
+        var loadExtensions = function(){
             // add spiderfier
             if(viewer.settings.spider !== null && viewer.settings.spider.spiderfier){
                 addSpiderSupport();
@@ -220,7 +236,7 @@ var GoogleMapsViewer = (function () {
                         });
                     });
                 }else{
-                    console.warn('GoogleMapsViewer: Wrong parameter for format (spiderfier:format)');
+                    console.warn('GoogleMapsViewer: Wrong parameter for spiderfier:format');
                 }
             }
 
@@ -255,8 +271,8 @@ var GoogleMapsViewer = (function () {
                     // set data
                     viewer.geojson = results;
 
-                    // initialize plugins after all data has been loaded
-                    initPlugins();
+                    // initialize extensions after all data has been loaded
+                    loadExtensions();
 
                     // create marker by geojson
                     for (var i = 0; i < results.features.length; i++) {
@@ -265,7 +281,7 @@ var GoogleMapsViewer = (function () {
                         var coords = results.features[i].geometry.coordinates;
                         var latLng = new google.maps.LatLng(coords[1],coords[0]);
 
-                        pub.addMarker(latLng, {}, results.features[i].properties.popup);
+                        pub.addMarker(latLng, results.features[i].properties.popup, {}, results.features[i].properties);
                     }
 
                     // set viewport including all markers
@@ -282,6 +298,9 @@ var GoogleMapsViewer = (function () {
             sourceLoader.send();
         };
 
+        /**
+         * Helper methods
+         */
         var serialize = function (obj, prefix) {
             var str = [],
                 p;
@@ -334,52 +353,99 @@ var GoogleMapsViewer = (function () {
         };
 
         /**
-         * Add Marker
+         * Public methods
          */
-        pub.addMarker = function(latLng, markerOptions, popupContent){
+        pub.addMarker = function(latLng, htmlContent, markerOptions, markerProps){
+            // fallback for lat and lng values passed by array
             if(Array.isArray(latLng)){
                 latLng = new google.maps.LatLng(latLng[0],latLng[1])
             }
 
+            // set nessesary settings
             var defaultOptions = {
                 position: latLng,
                 map: viewer.map
             };
 
-            if(viewer.settings.marker !== null && viewer.settings.marker.imagePath){
+            // set icon from settings
+            if(viewer.settings.marker !== null && viewer.settings.marker.icon.imagePath){
                 defaultOptions = extend(defaultOptions, {
-                    icon: viewer.settings.marker.imagePath
+                    icon: viewer.settings.marker.icon.imagePath
                 });
             }
 
+            // create marker
             var marker = new google.maps.Marker(
-                extend(defaultOptions, markerOptions)
+                extend(defaultOptions, viewer.settings.marker.options, markerOptions || {})
             );
 
-            if(popupContent) {
-                var popup = new google.maps.InfoWindow(
-                    extend({content: popupContent}, viewer.settings.popup.options)
-                );
+            marker.props = markerProps || null;
+            marker.popup = {
+                content: htmlContent,
+                path: viewer.settings.popup.source.path,
+                param: viewer.settings.popup.source.param
+            };
+
+            // create info window / popup
+            if(htmlContent || viewer.popupAsync) {
+
+                if(viewer.popupAsync){
+                    // replace placeholder
+                    if(marker.props !== null && viewer.settings.popup.source.path.indexOf('%') !== -1){
+                        var url = viewer.settings.popup.source.path.replace(/%\w+%/g, function(token) {
+                            token = token.replace(/%+/g, '');
+                            return marker.props[token] || token;
+                        });
+
+                        if(typeof viewer.settings.popup.source.param === 'object'){
+                            url += '?' + serialize(viewer.settings.popup.source.param);
+                        }
+
+                        marker.popup.path = url;
+                    }
+                }
 
                 if(viewer.settings.popup.showEvent){
                     marker.addListener(viewer.settings.popup.showEvent === 'click' && useSpiderfier ? 'spider_click' : viewer.settings.popup.showEvent, function() {
-                        if(viewer.currentInfoWindow){
-                            viewer.currentInfoWindow.close();
+                        // close active popup
+                        viewer.popup.close();
+
+                        if(viewer.popupAsync){
+                            // cancel current xhr
+                            viewer.popupLoader.abort();
+
+                            // add loader
+                            if(viewer.settings.popup.source.loader){
+                                viewer.popup.setContent(viewer.settings.popup.source.loaderMarkup);
+                            }
+
+                            viewer.popupLoader.open('GET', marker.popup.path, true);
+                            viewer.popupLoader.onload = function() {
+
+                                if (viewer.popupLoader.status >= 200 && viewer.popupLoader.status < 400) {
+                                    // parse json
+                                    var results = JSON.parse(viewer.popupLoader.responseText);
+
+                                    viewer.popup.setContent(results.results[0].template);
+                                }
+                            };
+
+                            viewer.popupLoader.onerror = function() {
+                                // stuff for error (hide loader etc)
+                            };
+
+                            viewer.popupLoader.send();
+                        }else{
+                            viewer.popup.setContent(marker.popup);
                         }
 
-                        popup.open(viewer.map, marker);
-
-                        viewer.currentInfoWindow = popup;
+                        viewer.popup.open(viewer.map, marker);
                     });
                 }
 
                 if(viewer.settings.popup.hideEvent){
                     marker.addListener(viewer.settings.popup.hideEvent, function() {
-                        if(viewer.currentInfoWindow){
-                            viewer.currentInfoWindow.close();
-                        }
-
-                        viewer.currentInfoWindow = null;
+                        viewer.popup.close();
                     });
                 }
             }
@@ -397,7 +463,7 @@ var GoogleMapsViewer = (function () {
                 viewer.spider.addMarker(marker);
             }
 
-            // push to bounds
+            // push to bounds object
             if(viewer.settings.map.bounds){
                 viewer.bounds.extend(latLng);
             }
