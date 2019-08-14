@@ -493,7 +493,7 @@ var GoogleMapsViewer = (function () {
  */
 function onGoogleMapsApiReady (e){
     if (document.readyState !== 'complete') {
-        var stateCheck = setInterval(() => {
+        var stateCheck = setInterval(function() {
             if (document.readyState === 'complete') {
                 clearInterval(stateCheck);
                 onGoogleMapsApiReady(e);
