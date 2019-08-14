@@ -37,7 +37,6 @@ A simple plugin to display Google Maps
 ##### Defaults
 ```javascript
 {
-    mapId: '',
     initInstant: false,
     source: {
         id: 'source',

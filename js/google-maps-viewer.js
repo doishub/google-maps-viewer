@@ -2,7 +2,7 @@
  * Google Maps Viewer
  *
  * @author Daniele Sciannimanica <https://github.com/doishub>
- * @version 0.0.9
+ * @version 0.0.10
  * @licence https://github.com/doishub/google-maps-viewer/blob/master/LICENSE
  */
 var GoogleMapsViewer = (function () {
@@ -16,7 +16,6 @@ var GoogleMapsViewer = (function () {
         var useSpiderfier = false;
 
         var defaults = {
-            mapId: '',
             initInstant: false,
             source: {
                 id: 'source',
